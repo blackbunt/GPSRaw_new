@@ -8,8 +8,8 @@
 
 SoftwareSerial mySerial =  SoftwareSerial(2, 3);
 //SoftwareSerial mySerial =  SoftwareSerial(2, 6);
-#define led1Pin 5
-#define led2Pin 6
+#define ledFixPin 6
+#define ledWritePin 5
 #define powerpin 4
 //#define powerpin 7
 #define chipSelect 10
@@ -29,7 +29,7 @@ const char* const string_table[] PROGMEM = {string_0, string_1, string_2};
 //#define SERIAL_SET   "$PSRF100,01,4800,08,01,00*0E\r\n"
 
 // GGA-Global Positioning System Fixed Data, message 103,00
-#define LOG_GGA 0
+#define LOG_GGA 1
 //#define GGA_ON   "$PSRF103,00,00,01,01*25\r\n"
 //#define GGA_OFF  "$PSRF103,00,00,00,01*24\r\n"
 
@@ -39,12 +39,12 @@ const char* const string_table[] PROGMEM = {string_0, string_1, string_2};
 #define GLL_OFF  "$PSRF103,01,00,00,01*27\r\n"
 
 // GSA-GNSS DOP and Active Satellites, message 103,02
-#define LOG_GSA 0
+#define LOG_GSA 1
 #define GSA_ON   "$PSRF103,02,00,01,01*27\r\n"
 #define GSA_OFF  "$PSRF103,02,00,00,01*26\r\n"
 
 // GSV-GNSS Satellites in View, message 103,03
-#define LOG_GSV 0
+#define LOG_GSV 1
 #define GSV_ON   "$PSRF103,03,00,01,01*26\r\n"
 #define GSV_OFF  "$PSRF103,03,00,00,01*27\r\n"
 
@@ -93,11 +93,11 @@ uint8_t i;
 void error(uint8_t errno) {
   while(1) {
     for (i=0; i<errno; i++) {
-      digitalWrite(led1Pin, HIGH);
-      digitalWrite(led2Pin, HIGH);
+      digitalWrite(ledFixPin, HIGH);
+      digitalWrite(ledWritePin, HIGH);
       delay(100);
-      digitalWrite(led1Pin, LOW);
-      digitalWrite(led2Pin, LOW);
+      digitalWrite(ledFixPin, LOW);
+      digitalWrite(ledWritePin, LOW);
       delay(100);
     }
     for (; i<10; i++) {
@@ -114,8 +114,8 @@ void setup()
   if (powerpin) {
     pinMode(powerpin, OUTPUT);
   }
-  pinMode(led1Pin, OUTPUT);
-  pinMode(led2Pin, OUTPUT);
+  pinMode(ledFixPin, OUTPUT);
+  pinMode(ledWritePin, OUTPUT);
 
   Serial.begin(GPSRATE);
   mySerial.begin(GPSRATE);
@@ -229,6 +229,14 @@ void loop()
   readline();
   lineread=!lineread;
   
+  if((fix)||(lineread))
+  {
+    digitalWrite(ledFixPin, HIGH);
+  }
+  else
+  {
+    digitalWrite(ledFixPin, LOW);
+  }
   // check if $GPRMC (global positioning fixed data)
   if (strncmp(buffer, "$GPRMC",6) == 0) {
     // find out if we got a fix
@@ -240,14 +248,6 @@ void loop()
       fix = 0;
     } else {
       fix = 1;
-    }
-    if((fix)||(lineread))
-    {
-      digitalWrite(led1Pin, HIGH);
-    }
-    else
-    {
-      digitalWrite(led1Pin, LOW);
     }
     if (sleepdelay) {
       if (!fix) {
@@ -391,13 +391,13 @@ void loop()
     {
       if(buffidx>1)
       {
-        digitalWrite(led2Pin, HIGH);      // sets the digital pin as output
+        digitalWrite(ledWritePin, HIGH);      // sets the digital pin as output
         if(f.write((uint8_t *) buffer, buffidx) != buffidx) {
           Serial.println("can't write!");
           error(7);
         }
         f.flush();
-        digitalWrite(led2Pin, LOW);
+        digitalWrite(ledWritePin, LOW);
       }
     }
     if(ijustwokeup)
@@ -411,7 +411,8 @@ void loop()
       Serial.print("\r\ngoing to sleep for ");
       Serial.print(sleepdelay, DEC);
       Serial.println(" seconds!");
-      digitalWrite(led1Pin, LOW);
+      digitalWrite(ledFixPin, LOW);
+      digitalWrite(ledWritePin, LOW);
   
       digitalWrite(powerpin, HIGH);  //turn off GPS
 
@@ -422,7 +423,7 @@ void loop()
       ijustwokeup=true;
 //      Serial.println("woke up after sleep!");
     } //if (sleepdelay) 
-    fix=false;
+    //fix=false;
   } //if (fix)
 }
 
