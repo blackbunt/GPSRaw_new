@@ -257,7 +257,7 @@ void loop()
       }
     }
 
-    // hhmmss time data
+/*    // hhmmss time data
     parseptr = buffer+7;
     tmp = parsedecimal(parseptr); 
     hour = tmp / 10000;
@@ -317,7 +317,7 @@ void loop()
     date = tmp / 10000;
     month = (tmp / 100) % 100;
     year = tmp % 100;
-    
+*/    
 /*    Serial.print("\nTime: ");
     Serial.print(hour, DEC); Serial.print(':');
     Serial.print(minute, DEC); Serial.print(':');
