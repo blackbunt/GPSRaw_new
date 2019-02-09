@@ -23,8 +23,23 @@ SoftwareSerial mySerial =  SoftwareSerial(2, 3);
 const char string_0[] PROGMEM =   "$PSRF100,01,4800,08,01,00*0E\r\n";
 const char string_1[] PROGMEM =   "$PSRF103,00,00,01,01*25\r\n";
 const char string_2[] PROGMEM =   "$PSRF103,00,00,00,01*24\r\n";
+const char string_3[] PROGMEM =   "$PSRF103,01,00,01,01*26\r\n";
+const char string_4[] PROGMEM =   "$PSRF103,01,00,00,01*27\r\n";
+const char string_5[] PROGMEM =   "$PSRF103,02,00,01,01*27\r\n";
+const char string_6[] PROGMEM =   "$PSRF103,02,00,00,01*26\r\n";
+const char string_7[] PROGMEM =   "$PSRF103,03,00,01,01*26\r\n";
+const char string_8[] PROGMEM =   "$PSRF103,03,00,00,01*27\r\n";
+const char string_9[] PROGMEM =   "$PSRF103,04,00,01,01*21\r\n";
+const char string_10[] PROGMEM =   "$PSRF103,04,00,00,01*20\r\n";
+const char string_11[] PROGMEM =   "$PSRF103,05,00,01,01*20\r\n";
+const char string_12[] PROGMEM =   "$PSRF103,05,00,00,01*21\r\n";
+const char string_13[] PROGMEM =   "$PSRF105,01*3E\r\n";
+const char string_14[] PROGMEM =   "$PSRF105,00*3F\r\n";
+const char string_15[] PROGMEM =   "$PSRF151,01*3F\r\n";
+const char string_16[] PROGMEM =   "$PSRF151,00*3E\r\n";
 
-const char* const string_table[] PROGMEM = {string_0, string_1, string_2};
+
+const char* const string_table[] PROGMEM = {string_0, string_1, string_2, string_3, string_4, string_5,string_6,string_7,string_8,string_9,string_10,string_11,string_12,string_13,string_14,string_15,string_16};
 
 //#define SERIAL_SET   "$PSRF100,01,4800,08,01,00*0E\r\n"
 
@@ -35,44 +50,44 @@ const char* const string_table[] PROGMEM = {string_0, string_1, string_2};
 
 // GLL-Geographic Position-Latitude/Longitude, message 103,01
 #define LOG_GLL 1
-#define GLL_ON   "$PSRF103,01,00,01,01*26\r\n"
-#define GLL_OFF  "$PSRF103,01,00,00,01*27\r\n"
+//#define GLL_ON   ""//$PSRF103,01,00,01,01*26\r\n"
+//#define GLL_OFF  "$PSRF103,01,00,00,01*27\r\n"
 
 // GSA-GNSS DOP and Active Satellites, message 103,02
 #define LOG_GSA 1
-#define GSA_ON   "$PSRF103,02,00,01,01*27\r\n"
-#define GSA_OFF  "$PSRF103,02,00,00,01*26\r\n"
+//#define GSA_ON   "$PSRF103,02,00,01,01*27\r\n"
+//#define GSA_OFF  "$PSRF103,02,00,00,01*26\r\n"
 
 // GSV-GNSS Satellites in View, message 103,03
 #define LOG_GSV 1
-#define GSV_ON   "$PSRF103,03,00,01,01*26\r\n"
-#define GSV_OFF  "$PSRF103,03,00,00,01*27\r\n"
+//#define GSV_ON   "$PSRF103,03,00,01,01*26\r\n"
+//#define GSV_OFF  "$PSRF103,03,00,00,01*27\r\n"
 
 // RMC-Recommended Minimum Specific GNSS Data, message 103,04
 #define LOG_RMC 1
-#define RMC_ON   "$PSRF103,04,00,01,01*21\r\n"
-#define RMC_OFF  "$PSRF103,04,00,00,01*20\r\n"
+//#define RMC_ON   "$PSRF103,04,00,01,01*21\r\n"
+//#define RMC_OFF  "$PSRF103,04,00,00,01*20\r\n"
 
 // VTG-Course Over Ground and Ground Speed, message 103,05
 #define LOG_VTG 1
-#define VTG_ON   "$PSRF103,05,00,01,01*20\r\n"
-#define VTG_OFF  "$PSRF103,05,00,00,01*21\r\n"
+//#define VTG_ON   "$PSRF103,05,00,01,01*20\r\n"
+//#define VTG_OFF  "$PSRF103,05,00,00,01*21\r\n"
 
 // Switch Development Data Messages On/Off, message 105
 #define LOG_DDM 1
-#define DDM_ON   "$PSRF105,01*3E\r\n"
-#define DDM_OFF  "$PSRF105,00*3F\r\n"
+//#define DDM_ON   "$PSRF105,01*3E\r\n"
+//#define DDM_OFF  "$PSRF105,00*3F\r\n"
 
 #define USE_WAAS   0     // useful in US, but slower fix
-#define WAAS_ON    "$PSRF151,01*3F\r\n"       // the command for turning on WAAS
-#define WAAS_OFF   "$PSRF151,00*3E\r\n"       // the command for turning off WAAS
+//#define WAAS_ON    "$PSRF151,01*3F\r\n"       // the command for turning on WAAS
+//#define WAAS_OFF   "$PSRF151,00*3E\r\n"       // the command for turning off WAAS
 
 
 // GPS parser for 406a
 #define BUFFSIZ 90 // plenty big
 char buffer[BUFFSIZ];
 char fnamebuf[15];
-char sleepdelaybuf[10];
+char sleepdelaybuf[4];
 char *parseptr;
 char buffidx;
 bool fix = false; // current fix data
@@ -128,7 +143,7 @@ void setup()
     Serial.println("Card init. failed!");
     error(1);
   }
-  modeState = HIGH;//digitalRead(modepin);
+  modeState = digitalRead(modepin);
   if(modeState==LOW)
   {
    Serial.println("logger mode");
@@ -178,9 +193,15 @@ void setup()
     delay(250);
   
     if ((LOG_DDM)&&(!sleepdelay))
-      mySerial.println(DDM_ON);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[13])));
+      mySerial.println(buffer);
+    }
     else
-      mySerial.println(DDM_OFF);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[14])));
+      mySerial.println(buffer);
+    }
     delay(250);
   
     if ((LOG_GGA)&&(!sleepdelay))
@@ -196,39 +217,75 @@ void setup()
     delay(250);
   
     if ((LOG_GLL)&&(!sleepdelay))
-      mySerial.println(GLL_ON);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[3])));
+      mySerial.println(buffer);
+    }
     else
-      mySerial.println(GLL_OFF);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[4])));
+      mySerial.println(buffer);
+    }
     delay(250);
   
     if ((LOG_GSA)&&(!sleepdelay))
-      mySerial.println(GSA_ON);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[5])));
+      mySerial.println(buffer);
+    }
     else
-      mySerial.println(GSA_OFF);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[6])));
+      mySerial.println(buffer);
+    }
     delay(250);
   
     if ((LOG_GSV)&&(!sleepdelay))
-      mySerial.println(GSV_ON);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[7])));
+      mySerial.println(buffer);
+    }
     else
-      mySerial.println(GSV_OFF);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[8])));
+      mySerial.println(buffer);
+    }
     delay(250);
   
     if ((LOG_RMC)||(sleepdelay))
-      mySerial.println(RMC_ON);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[9])));
+      mySerial.println(buffer);
+    }
     else
-      mySerial.println(RMC_OFF);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[10])));
+      mySerial.println(buffer);
+    }
     delay(250);
   
     if ((LOG_VTG)&&(!sleepdelay))
-      mySerial.println(VTG_ON);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[11])));
+      mySerial.println(buffer);
+    }
     else
-      mySerial.println(VTG_OFF);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[12])));
+      mySerial.println(buffer);
+    }
     delay(250);
   
     if ((USE_WAAS)&&(!sleepdelay))
-      mySerial.println(WAAS_ON);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[15])));
+      mySerial.println(buffer);
+    }
     else
-      mySerial.println(WAAS_OFF);
+    {
+      strcpy_P(buffer, (char*)pgm_read_word(&(string_table[16])));
+      mySerial.println(buffer);
+    }
   
     Serial.println("ready!");
   }
